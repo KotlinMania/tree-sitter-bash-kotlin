@@ -283,6 +283,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.8.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
+                implementation("io.github.kotlinmania:tree-sitter-language-kotlin:0.1.0")
             }
         }
         val commonTest by getting {
@@ -374,7 +375,9 @@ rootProject.extensions.configure<NodeJsRootExtension>("kotlinNodeJs") {
 
 mavenPublishing {
     publishToMavenCentral()
-    signAllPublications()
+    if (project.findProperty("signingInMemoryKey") != null) {
+        signAllPublications()
+    }
 
     coordinates(group.toString(), "tree-sitter-bash-kotlin", version.toString())
 
