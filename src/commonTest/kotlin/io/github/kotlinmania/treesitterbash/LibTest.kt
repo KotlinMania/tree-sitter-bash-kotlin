@@ -1,4 +1,4 @@
-// port-lint: source bindings/rust/lib.rs
+// port-lint: source lib.rs
 package io.github.kotlinmania.treesitterbash
 
 import io.github.kotlinmania.treesitter.Parser
