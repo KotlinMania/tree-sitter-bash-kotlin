@@ -1,21 +1,27 @@
-// port-lint: source bindings/rust/lib.rs
+// port-lint: source lib.rs
 package io.github.kotlinmania.treesitterbash
 
 /**
- * Bash language support for the [tree-sitter](https://tree-sitter.github.io/) parsing library.
+ * This module provides Bash language support for the [tree-sitter] parsing library.
  *
- * Typically, use the [LANGUAGE] constant to add this language to a tree-sitter parser
- * and then parse some code:
+ * Typically, you will use the [LANGUAGE] constant to add this language to a
+ * tree-sitter [Parser], and then use the parser to parse some code:
  *
  * ```kotlin
+ * import io.github.kotlinmania.treesitter.Parser
+ *
  * val code = """
  * echo "hello world!"
  * """
  * val parser = Parser()
  * parser.setLanguage(LANGUAGE.into())
+ *     ?: error("Error loading Bash parser")
  * val tree = parser.parse(code, null)!!
  * check(!tree.rootNode().hasError())
  * ```
+ *
+ * @see Parser the tree-sitter parser type, supplied by the io.github.kotlinmania:tree-sitter-kotlin sibling
+ * @see <a href="https://tree-sitter.github.io/">tree-sitter</a>
  */
 
 // Tracking ledger. The upstream Rust module is parceled across these files in this same
