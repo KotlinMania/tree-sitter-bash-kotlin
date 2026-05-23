@@ -209,7 +209,11 @@ kotlin {
         binaries.framework { baseName = "TreeSitterBash"; xcf.add(this) }
     }
     iosSimulatorArm64 {
-        binaries.framework { baseName = "TreeSitterBash"; xcf.add(this) }
+        binaries.framework {
+            baseName = "TreeSitterBash"
+            isStatic = true
+            xcf.add(this)
+        }
     }
     iosX64 {
         binaries.framework { baseName = "TreeSitterBash"; xcf.add(this) }
