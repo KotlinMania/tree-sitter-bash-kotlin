@@ -11,7 +11,7 @@ import kotlin.test.assertTrue
  * on every Kotlin target via the generated [BUNDLED_TREE_SITTER_BASH_RESOURCES]
  * map, and [LANGUAGE] is a non-null [LanguageFn]. The grammar-pointer side
  * of [TreeSitterBash] (the JNI / cinterop / wasm bridge to the
- * `tree_sitter_bash` C entry point) is exercised by the per-target host
+ * `treeSitterBash` C entry point) is exercised by the per-target host
  * test runners, not by this commonTest.
  */
 class LibTest {
@@ -36,7 +36,7 @@ class LibTest {
     }
 
     @Test
-    fun languageConstantWrapsTheGrammarEntryPoint() {
+    fun testCanLoadGrammar() {
         // LanguageFn.fromRaw captures the function reference without invoking
         // it, so the constant is non-null on every target even when the
         // per-platform `treeSitterBash()` actual is not wired to a real C
