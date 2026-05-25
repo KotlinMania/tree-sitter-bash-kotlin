@@ -31,5 +31,6 @@ package io.github.kotlinmania.treesitterbash
 //   - NodeTypes.kt         — the NODE_TYPES constant
 //   - HighlightQuery.kt    — the HIGHLIGHT_QUERY constant
 //   - Resources.kt         — the bundled-resource reader used by NODE_TYPES and HIGHLIGHT_QUERY
+//   - Build.kt             — ledger for the upstream Cargo build.rs (native compilation lives in build.gradle.kts)
 //
 // The inline upstream test module is mirrored under commonTest as LibTest.kt.
