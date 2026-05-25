@@ -1012,6 +1012,323 @@ expensive pieces, then run a final
 `./gradlew build --no-daemon --console=plain --no-configuration-cache`
 that reaches `BUILD SUCCESSFUL`.
 
+### 5.3 Canonical complete `build.gradle.kts` — model after this
+
+**The full annotated reference lives at
+`/Volumes/stuff/Projects/kotlinmania/canonical/build.gradle.kts.template`**.
+That file is the single source of truth for what every `*-kotlin/` repo's
+`build.gradle.kts` should look like, section-by-section, with rationale
+comments at every block. It was adapted from `kasuari-kotlin` v0.1.5 (the
+most recently verified end-to-end repo — Maven Central publish succeeded
+on 2026-05-24) with `watchosArm32` retired per §5.5.1 and the JVM-required
+guard from §5.4 enforced.
+
+To check a repo against the canonical:
+
+```bash
+diff -u /Volumes/stuff/Projects/kotlinmania/canonical/build.gradle.kts.template \
+        <repo>/build.gradle.kts \
+  | grep -vE "<RepoName>|<repo-name>|<package|<Version>|<Description>|<inception>|<package_dir>"
+```
+
+Differences that are NOT placeholder substitutions need explanation.
+
+The canonical has 10 sections, in this order — keep this order in any
+new repo:
+
+1. **Plugins + project coordinates.** Pinned Kotlin 2.3.21, Android KMP
+   library 9.2.1, vanniktech maven-publish 0.36.0. `group =
+   "io.github.kotlinmania"`. `version` is the only per-release knob.
+2. **Android SDK installer** (§8). Gradle-backed, no shell scripts.
+   Installs at configuration time so the Android Gradle plugin can
+   resolve the SDK before any task runs.
+3. **`kotlin { … }` target block.** The §5.4 "never remove" set:
+   `jvm()`, `macosArm64`, all three current iOS targets, both current
+   tvOS targets, all three current watchOS targets (no `watchosArm32`),
+   Linux x64/Arm64, MinGW, all four Android Native targets, `js {
+   browser(); nodejs() }`, `wasmJs { browser(); nodejs() }`, `wasmWasi
+   { nodejs() }`, `swiftExport { … }`, `android { … }`. Plus
+   `XCFramework("<RepoName>")`. Plus `jvmToolchain(21)`. Plus
+   `applyDefaultHierarchyTemplate()`. Plus
+   `allWarningsAsErrors.set(true)`.
+4. **Test logging.** Full stack traces + standard streams. Required
+   so test failures in CI surface diagnostics.
+5. **Kotlin/JS toolchain + security patches** (§9). Node 24.16.0, Yarn
+   1.22.22, the workspace-wide yarn `resolution(...)` block,
+   vendored `karma-webpack`.
+6. **Maven publishing** (vanniktech plugin). Pinned coordinates, Apache
+   2.0 license, sydneyrenee developer block, SCM URLs.
+7. **CodeQL extraction** (§8 CodeQL). `codeqlCompileJvm` task with
+   `prepareCodeqlCommonMainSources` (strips Swift Export annotations
+   for plain JVM kotlinc). `codeqlAndroidAar` for sibling Android
+   artifacts.
+8. **Setup tasks.** `setupAndroidSdk` (Kotlin-backed, not Exec).
+   `swiftExportSmokeTest` (runs `embedSwiftExportForXcode` + `swift
+   test`). `test` umbrella that runs the host-portable subset
+   including the Swift smoke test.
+9. **Build-gate** (`fullTargetBuildTaskNames` + `tasks.named("build")
+   { dependsOn(...) }` + `afterEvaluate` safety net). The explicit
+   set is the **audit contract** — see §5 for why both explicit and
+   dynamic wiring are required.
+10. **Wasm-WASI Node preopens patch.** `patchWasmWasiNodePreopens`
+    runs before `wasmWasiNodeTest` so the runner can see the
+    filesystem.
+
+#### The three blocks agents most often misedit (verbatim from the canonical)
+
+When in doubt about these, **copy verbatim from the canonical** — don't
+infer.
+
+**(a) `kotlin { … }` target block — Apple target shape, with the
+iOS-Simulator-static + retired-targets rules baked in.** Substitute
+`<RepoName>` only:
+
+```kotlin
+kotlin {
+    applyDefaultHierarchyTemplate()
+
+    compilerOptions {
+        allWarningsAsErrors.set(true)                  // never scope this down
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
+    val xcf = XCFramework("<RepoName>")
+
+    macosArm64 {
+        binaries.framework { baseName = "<RepoName>"; xcf.add(this) }
+    }
+
+    // ALL three iOS slices are static — iOS Simulator fat XCFramework
+    // requires homogeneous static/dynamic across iosSimulatorArm64 +
+    // iosX64; iosArm64 is also static for Swift Export bridge symmetry.
+    iosArm64           { binaries.framework { baseName = "<RepoName>"; isStatic = true; xcf.add(this) } }
+    iosSimulatorArm64  { binaries.framework { baseName = "<RepoName>"; isStatic = true; xcf.add(this) } }
+    iosX64             { binaries.framework { baseName = "<RepoName>"; isStatic = true; xcf.add(this) } }
+
+    // tvOS: device + Apple Silicon simulator. tvosX64 RETIRED (§5.5.2).
+    tvosArm64          { binaries.framework { baseName = "<RepoName>"; xcf.add(this) } }
+    tvosSimulatorArm64 { binaries.framework { baseName = "<RepoName>"; xcf.add(this) } }
+
+    // watchOS: 64-bit only. watchosArm32 RETIRED (§5.5.1). watchosX64 RETIRED (§5.5.2).
+    watchosArm64           { binaries.framework { baseName = "<RepoName>"; xcf.add(this) } }
+    watchosDeviceArm64     { binaries.framework { baseName = "<RepoName>"; xcf.add(this) } }
+    watchosSimulatorArm64  { binaries.framework { baseName = "<RepoName>"; xcf.add(this) } }
+
+    linuxX64();  linuxArm64();  mingwX64()
+
+    androidNativeArm32();  androidNativeArm64()
+    androidNativeX86();    androidNativeX64()
+
+    js                                    { browser(); nodejs() }
+    @OptIn(ExperimentalWasmDsl::class) wasmJs   { browser(); nodejs() }
+    @OptIn(ExperimentalWasmDsl::class) wasmWasi { nodejs() }
+
+    swiftExport {
+        moduleName = "<RepoName>"
+        flattenPackage = "<package.path>"
+    }
+
+    android {
+        namespace = "<package.path>"
+        compileSdk = 34
+        minSdk = 24
+        withHostTestBuilder {}.configure {}
+        withDeviceTestBuilder { sourceSetTreeName = "test" }
+    }
+
+    jvm()                                              // REQUIRED — never remove (§5.4)
+
+    sourceSets {
+        val commonMain by getting {
+            kotlin.srcDir("commonMain/src")
+        }
+        val commonTest by getting {
+            kotlin.srcDir("commonTest/kotlin")
+            dependencies { implementation(kotlin("test")) }
+        }
+    }
+
+    jvmToolchain(21)
+}
+```
+
+**(b) `fullTargetBuildTaskNames` build-gate.** The retired targets are
+**NOT** in this set — adding them back will fail with `Task '…' not
+found`:
+
+```kotlin
+val fullTargetBuildTaskNames = setOf(
+    // Android KMP
+    "compileAndroidMain", "compileAndroidHostTest", "compileAndroidDeviceTest",
+    "assembleAndroidMain", "assembleUnitTest", "assembleAndroidTest",
+    "assembleAndroidDeviceTest", "testAndroidHostTest",
+    // JVM — REQUIRED (§5.4)
+    "jvmMainClasses", "jvmTestClasses",
+    // JS / Wasm
+    "jsMainClasses", "jsTestClasses",
+    "wasmJsMainClasses", "wasmJsTestClasses",
+    "wasmWasiMainClasses", "wasmWasiTestClasses",
+    // Native binaries + test binaries
+    "androidNativeArm32Binaries",    "androidNativeArm32TestBinaries",
+    "androidNativeArm64Binaries",    "androidNativeArm64TestBinaries",
+    "androidNativeX64Binaries",      "androidNativeX64TestBinaries",
+    "androidNativeX86Binaries",      "androidNativeX86TestBinaries",
+    "iosArm64Binaries",              "iosArm64TestBinaries",
+    "iosSimulatorArm64Binaries",     "iosSimulatorArm64TestBinaries",
+    "iosX64Binaries",                "iosX64TestBinaries",
+    "linuxArm64Binaries",            "linuxArm64TestBinaries",
+    "linuxX64Binaries",              "linuxX64TestBinaries",
+    "macosArm64Binaries",            "macosArm64TestBinaries",
+    "mingwX64Binaries",              "mingwX64TestBinaries",
+    "tvosArm64Binaries",             "tvosArm64TestBinaries",
+    "tvosSimulatorArm64Binaries",    "tvosSimulatorArm64TestBinaries",
+    // watchosArm32* RETIRED — do not re-add (§5.5.1)
+    "watchosArm64Binaries",          "watchosArm64TestBinaries",
+    "watchosDeviceArm64Binaries",    "watchosDeviceArm64TestBinaries",
+    "watchosSimulatorArm64Binaries", "watchosSimulatorArm64TestBinaries",
+    // Swift Export + XCFramework
+    "swiftExportSmokeTest",
+    "assemble<RepoName>XCFramework",
+)
+
+tasks.named("build") { dependsOn(fullTargetBuildTaskNames) }
+
+afterEvaluate {
+    tasks.named("build") {
+        dependsOn(tasks.matching {
+            name.endsWith("MainClasses") || name.endsWith("TestClasses") ||
+                name.endsWith("Binaries") || name.endsWith("XCFramework")
+        })
+    }
+}
+```
+
+**(c) `swiftExportSmokeTest` + `test` umbrella.** Wires `swift test`
+into `./gradlew test` so Swift Export failures surface locally per §4
+/ §6:
+
+```kotlin
+val swiftExportSmokeTest = tasks.register("swiftExportSmokeTest") {
+    group = "verification"
+    description = "Builds the Swift Export SPM package and runs swift test against it."
+    onlyIf {
+        if (!isMacHost) logger.lifecycle("swiftExportSmokeTest: skipped (requires macOS)")
+        isMacHost
+    }
+    outputs.upToDateWhen { false }
+    doLast {
+        val execOperations = serviceOf<ExecOperations>()
+        val swiftBuildDir = layout.buildDirectory.dir("swift-test").get().asFile.absolutePath
+        execOperations.exec {
+            workingDir = projectDir
+            commandLine("./gradlew", "embedSwiftExportForXcode",
+                "--no-configuration-cache", "--no-daemon", "--console=plain")
+            environment(mapOf(
+                "BUILT_PRODUCTS_DIR" to swiftBuildDir,
+                "TARGET_BUILD_DIR" to swiftBuildDir,
+                "SDK_NAME" to "macosx", "CONFIGURATION" to "Debug", "ARCHS" to "arm64",
+                "FRAMEWORKS_FOLDER_PATH" to "Frameworks",
+                "MACOSX_DEPLOYMENT_TARGET" to "14.0",
+                "DEPLOYMENT_TARGET_SETTING_NAME" to "MACOSX_DEPLOYMENT_TARGET",
+            ))
+        }.assertNormalExitValue()
+        execOperations.exec {
+            workingDir = layout.projectDirectory.dir("swift-test-harness").asFile
+            commandLine("swift", "test")
+        }.assertNormalExitValue()
+    }
+}
+
+tasks.register("test") {
+    group = "verification"
+    description = "Runs the host-portable test suite (macOS + JS + WasmJS + Android unit + Swift smoke)."
+    val defaultTestTasks = listOf(
+        "macosArm64Test", "jvmTest", "jsNodeTest", "wasmJsNodeTest",
+        "compileAndroidMain", "assembleUnitTest", "swiftExportSmokeTest",
+    )
+    dependsOn(defaultTestTasks.mapNotNull { taskName -> tasks.findByName(taskName) })
+}
+```
+
+#### Companion files required
+
+A complete repo also needs:
+
+- **`gradle.properties`** with `kotlin.native.parallelThreads=0` (§10).
+- **`gradle/npm/karma-webpack/package.json`** — vendored karma-webpack
+  with hardened glob/rimraf/inflight pins. Shape in §9.
+- **`swift-test-harness/Package.swift`** + at least one
+  `Tests/.../*.swift` smoke test that does `import <RepoName>`. See §4
+  / the canonical SWIFT_EXPORT_ROLLOUT.md.
+- **`.github/workflows/{ci,codeql,publish,ios,macos,tvos,watchos,android,android-native,linux,windows,js,wasm,swift}.yml`**
+  — per §7 (triggers) and
+  `automation-artifacts/2026-05-24-reusable-workflow-ui/PROPOSAL.md`
+  (add `workflow_dispatch:` to platform workflows).
+
+### 5.4 Targets you must NEVER remove
+
+The §5.5 retirement subsections cover **exactly three** kinds of
+target removal — `watchosArm32` (Apple-hardware-EOL + Mach-O limit)
+and the JetBrains-deprecated x86_64 simulators (`tvosX64`,
+`watchosX64`, `macosX64`). **Nothing else may be removed.** This
+subsection exists because an agent on 2026-05-24 deleted `jvm()` from
+a repo's target block, evidently misreading §5.5 as license to retire
+other targets. It is not.
+
+The following targets are **always present** in every `*-kotlin/`
+repo's `build.gradle.kts` target block unless the repo-local docs
+explicitly document the technical impossibility (e.g. an upstream
+dependency that genuinely can't compile for that target, with the
+sibling-port blocker named per §3):
+
+- **`jvm()`** — Java Virtual Machine target. Not optional. Required
+  for `commonMain` consumers on the JVM, for `jvmTest` host
+  verification, and for the Maven publication coordinate that downstream
+  Kotlin/JVM and Android consumers actually depend on. **Never remove
+  `jvm()`.**
+- **`macosArm64`, `iosArm64`, `iosSimulatorArm64`, `iosX64`** — Apple
+  device + simulator slices that ship in the XCFramework.
+- **`tvosArm64`, `tvosSimulatorArm64`** — current Apple TV
+  hardware + simulator. (`tvosX64` is the retired one per §5.5.2.)
+- **`watchosArm64`, `watchosDeviceArm64`, `watchosSimulatorArm64`** —
+  current Apple Watch slices. (`watchosArm32` is retired per §5.5.1.)
+- **`linuxX64`, `linuxArm64`, `mingwX64`** — Linux + Windows native.
+- **`androidNativeArm32`, `androidNativeArm64`, `androidNativeX86`,
+  `androidNativeX64`** — Android Native NDK targets.
+- **`js { browser(); nodejs() }`** — Kotlin/JS for both runtimes.
+- **`wasmJs { browser(); nodejs() }`** — Kotlin/Wasm-JS for both
+  runtimes.
+- **`wasmWasi { nodejs() }`** — Kotlin/Wasm-WASI.
+- **`android { … }`** — Android KMP library target with host + device
+  test builders.
+- **`swiftExport { … }`** — Swift Export bridge.
+- **`XCFramework("<Name>")`** — repo-specific framework registration.
+
+**The forbidden anti-pattern.** When `./gradlew build` fails because
+`fullTargetBuildTaskNames` references a task that doesn't exist (e.g.
+`Task 'jvmMainClasses' not found in root project`), the **correct
+fix** is to **add the missing target back to the `kotlin { … }`
+block** — not to delete the task name from the gate. The gate is the
+contract; the target block is what the gate forces you to declare.
+
+**If a target genuinely cannot compile** (a real upstream impossibility,
+not "I don't feel like dealing with it"), the resolution is:
+
+1. Verify it's a real impossibility (e.g. JVM-only Java stdlib API
+   the Kotlin/Native compiler can't resolve, where no sibling
+   Kotlin-port provides the bridge — see §3 "kotlinmania siblings").
+2. Document the technical reason in the repo's `README.md` and
+   `NEXT_ACTIONS.md`.
+3. Open a PR titled `build: document <target> impossibility for this
+   repo` with the technical evidence (compiler error, missing
+   upstream symbol) inline.
+4. **Only then** remove the target + matching gate lines + source-set
+   directories (per the §5.5 scrub procedure shape).
+
+An undocumented `jvm()` removal — or any target removal without a
+named technical blocker — is a §5 violation. Revert it; restore the
+target; restore the build-gate entries.
+
 ### 5.5 Retired targets — `watchosArm32` (armv7k)
 
 `watchosArm32` is **retired workspace-wide as of 2026-05-24**. It is no
