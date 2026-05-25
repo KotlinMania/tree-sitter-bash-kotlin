@@ -35,10 +35,11 @@ val androidCommandLineToolsRevision = "14742923"
 val projectCompileSdk = "34"
 val projectAndroidBuildTools = "36.0.0"
 val isWindowsHost = System.getProperty("os.name").lowercase().contains("windows")
+val isMacHost = System.getProperty("os.name").lowercase().contains("mac")
 val androidSdkOsName =
     when {
         isWindowsHost -> "win"
-        System.getProperty("os.name").lowercase().contains("mac") -> "mac"
+        isMacHost -> "mac"
         System.getProperty("os.name").lowercase().contains("linux") -> "linux"
         else -> throw GradleException("Unsupported Android SDK setup OS: ${System.getProperty("os.name")}")
     }
@@ -219,8 +220,7 @@ val generateBundledTreeSitterBashResources = tasks.register("generateBundledTree
         val highlightsB64 = encoder.encodeToString(highlightsFile.asFile.readBytes())
         pkgDir.resolve("BundledResources.kt").writeText(
             """
-            // port-lint: ignore — generated from
-            // src/commonMain/resources/io/github/kotlinmania/treesitterbash/
+            // Generated from src/commonMain/resources/io/github/kotlinmania/treesitterbash/
             // by the generateBundledTreeSitterBashResources Gradle task.
             // DO NOT EDIT BY HAND.
             @file:OptIn(kotlin.io.encoding.ExperimentalEncodingApi::class)
@@ -480,10 +480,54 @@ tasks.register("setupAndroidSdk") {
     }
 }
 
+val swiftExportSmokeTest = tasks.register("swiftExportSmokeTest") {
+    group = "verification"
+    description = "Builds the Swift Export SPM package and runs swift test against it."
+    onlyIf {
+        if (!isMacHost) {
+            logger.lifecycle("swiftExportSmokeTest: skipped because Swift Export smoke tests require macOS")
+        }
+        isMacHost
+    }
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val execOperations = serviceOf<ExecOperations>()
+        val swiftBuildDir = layout.buildDirectory.dir("swift-test").get().asFile.absolutePath
+        execOperations.exec {
+            workingDir = projectDir
+            commandLine(
+                "./gradlew",
+                "embedSwiftExportForXcode",
+                "--no-configuration-cache",
+                "--no-daemon",
+                "--console=plain",
+            )
+            environment(
+                mapOf(
+                    "BUILT_PRODUCTS_DIR" to swiftBuildDir,
+                    "TARGET_BUILD_DIR" to swiftBuildDir,
+                    "SDK_NAME" to "macosx",
+                    "CONFIGURATION" to "Debug",
+                    "ARCHS" to "arm64",
+                    "FRAMEWORKS_FOLDER_PATH" to "Frameworks",
+                    "MACOSX_DEPLOYMENT_TARGET" to "14.0",
+                    "DEPLOYMENT_TARGET_SETTING_NAME" to "MACOSX_DEPLOYMENT_TARGET",
+                ),
+            )
+        }.assertNormalExitValue()
+
+        execOperations.exec {
+            workingDir = layout.projectDirectory.dir("swift-test-harness").asFile
+            commandLine("swift", "test")
+        }.assertNormalExitValue()
+    }
+}
+
 tasks.register("test") {
     group = "verification"
     description =
-        "Runs the host-portable test suite (macOS + JS + WasmJS + Android unit). " +
+        "Runs the host-portable test suite (macOS + JS + WasmJS + Android unit + Swift smoke test). " +
         "Non-host native targets (mingwX64, linuxX64) only run on their own host."
 
     val defaultTestTasks = listOf(
@@ -493,6 +537,7 @@ tasks.register("test") {
         "wasmJsNodeTest",
         "compileAndroidMain",
         "assembleUnitTest",
+        "swiftExportSmokeTest",
     )
 
     dependsOn(defaultTestTasks.mapNotNull { taskName -> tasks.findByName(taskName) })
@@ -551,6 +596,7 @@ val fullTargetBuildTaskNames = setOf(
     "watchosDeviceArm64TestBinaries",
     "watchosSimulatorArm64Binaries",
     "watchosSimulatorArm64TestBinaries",
+    "swiftExportSmokeTest",
     "assembleTreeSitterBashXCFramework",
 )
 

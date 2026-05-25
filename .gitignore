@@ -2,6 +2,10 @@
 build/
 .gradle/
 .kotlin/
+
+# Local developer artifact — workspace ast_distance binary copied in per
+# kotlinmania AGENTS.md §3. Not a tracked dependency.
+tools/ast_distance
 *.class
 *.jar
 *.war
