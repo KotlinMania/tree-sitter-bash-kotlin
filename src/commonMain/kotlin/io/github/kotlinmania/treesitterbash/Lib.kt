@@ -34,3 +34,5 @@ package io.github.kotlinmania.treesitterbash
 //   - Build.kt             — ledger for the upstream Cargo build.rs (native compilation lives in build.gradle.kts)
 //
 // The inline upstream test module is mirrored under commonTest as LibTest.kt.
+
+internal object Lib
