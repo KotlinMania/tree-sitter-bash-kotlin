@@ -1,10 +1,10 @@
 [versions]
-kotlin = "2.4.0"
+kotlin = "2.4.10"
 coroutines = "1.11.0"
 serialization = "1.11.0"
 datetime = "0.8.0"
 collectionsImmutable = "0.5.1"
-androidKmp = "9.2.1"
+androidKmp = "9.3.1"
 detekt = "1.23.8"
 ktlint = "14.2.0"
 kotlinxBenchmark = "0.4.17"
@@ -19,6 +19,7 @@ kotlinx-benchmark = { id = "org.jetbrains.kotlinx.benchmark", version.ref = "kot
 kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
 
 [libraries]
+tree-sitter-language = { module = "io.github.kotlinmania:tree-sitter-language", version = "0.1.0" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
@@ -27,7 +28,8 @@ collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-im
 kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmark" }
 
 [bundles]
-treesitterbash-commonMain = [
+tree-sitter-bash-commonMain = [
+  "tree-sitter-language",
   "kotlinx-coroutines-core",
   "kotlinx-serialization-core",
   "kotlinx-serialization-json",

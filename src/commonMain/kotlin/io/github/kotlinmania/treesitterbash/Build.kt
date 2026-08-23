@@ -28,4 +28,3 @@ package io.github.kotlinmania.treesitterbash
  * Gradle build, not Kotlin source.
  */
 internal object Build
-
