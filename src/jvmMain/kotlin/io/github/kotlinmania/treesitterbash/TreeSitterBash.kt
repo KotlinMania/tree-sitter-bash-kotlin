@@ -4,7 +4,7 @@ private val nativeLibraryLoaded: Unit = run { System.loadLibrary("tree-sitter-ba
 
 private external fun nativeTreeSitterBashLanguagePointer(): Long
 
-internal actual fun treeSitterBashRaw(): Long {
+internal actual fun nativeLanguagePointer(): Long {
     nativeLibraryLoaded
     return nativeTreeSitterBashLanguagePointer()
 }

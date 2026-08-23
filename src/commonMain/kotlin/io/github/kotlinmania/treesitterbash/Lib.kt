@@ -19,11 +19,19 @@ import io.github.kotlinmania.treesitterlanguage.LanguageFn
  */
 
 /**
+ * Foreign function interface entry point resolving the C language pointer for Bash grammar.
+ */
+fun treeSitterBash(): Long {
+    val ptr = nativeLanguagePointer()
+    return ptr
+}
+
+/**
  * The tree-sitter [LanguageFn] for this grammar.
  *
  * @see <a href="https://docs.rs/tree-sitter-language">LanguageFn upstream documentation</a>
  */
-val LANGUAGE: LanguageFn = LanguageFn.fromRaw(::treeSitterBashRaw)
+val LANGUAGE: LanguageFn = LanguageFn.fromRaw(::treeSitterBash)
 
 /**
  * The content of the [`node-types.json`](https://tree-sitter.github.io/tree-sitter/using-parsers#static-node-types)

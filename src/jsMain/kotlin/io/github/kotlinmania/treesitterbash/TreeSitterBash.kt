@@ -11,7 +11,7 @@ package io.github.kotlinmania.treesitterbash
  * caller stops here with a clear runtime error rather than handing back a
  * zero pointer that downstream `Language(0L)` callers would dereference.
  */
-internal actual fun treeSitterBashRaw(): Long =
+internal actual fun nativeLanguagePointer(): Long =
     throw UnsupportedOperationException(
         "tree-sitter-bash grammar binding on Kotlin/JS requires an async " +
             "web-tree-sitter load (npm 'web-tree-sitter' + 'tree-sitter-bash') " +

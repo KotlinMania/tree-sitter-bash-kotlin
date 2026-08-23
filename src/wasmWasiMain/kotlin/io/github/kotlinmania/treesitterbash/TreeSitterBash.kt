@@ -7,7 +7,7 @@ package io.github.kotlinmania.treesitterbash
  * the compiled `parser.c`/`scanner.c`. Until that lands, every wasm-wasi
  * caller stops here with a clear runtime error.
  */
-internal actual fun treeSitterBashRaw(): Long =
+internal actual fun nativeLanguagePointer(): Long =
     throw UnsupportedOperationException(
         "tree-sitter-bash grammar binding is not available on Kotlin/Wasm-WASI. " +
             "WASI does not provide JS interop, and no Wasm-WASI port of " +

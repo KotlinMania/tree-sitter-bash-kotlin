@@ -11,7 +11,7 @@ package io.github.kotlinmania.treesitterbash
  * dereference. Same shape the upstream `tree-sitter-rust` crate uses for
  * targets where the grammar is not bundled.
  */
-internal actual fun treeSitterBashRaw(): Long =
+internal actual fun nativeLanguagePointer(): Long =
     throw UnsupportedOperationException(
         "tree-sitter-bash grammar binding is not wired on Kotlin/Native yet. " +
             "Add a per-target cinterop to libtree-sitter-bash (.a) before " +
