@@ -19,10 +19,10 @@ import io.github.kotlinmania.treesitterlanguage.LanguageFn
  */
 
 /**
- * Raw foreign function interface entry point for the Tree-sitter Bash C grammar pointer.
+ * Foreign function interface entry point resolving the C language pointer for Bash grammar.
  */
 fun treeSitterBash(): Long {
-    val ptr = treeSitterBashRaw()
+    val ptr = nativeLanguagePointer()
     return ptr
 }
 
@@ -34,27 +34,12 @@ fun treeSitterBash(): Long {
 val LANGUAGE: LanguageFn = LanguageFn.fromRaw(::treeSitterBash)
 
 /**
- * Returns the [LanguageFn] for this grammar.
- */
-fun language(): LanguageFn = LANGUAGE
-
-/**
  * The content of the [`node-types.json`](https://tree-sitter.github.io/tree-sitter/using-parsers#static-node-types)
  * file for this grammar.
  */
 val NODE_TYPES: String by lazy { readBundledTreeSitterBashResource("node-types.json") }
 
 /**
- * Returns the `node-types.json` content for this grammar.
- */
-fun nodeTypes(): String = NODE_TYPES
-
-/**
  * The syntax highlighting query for this grammar.
  */
 val HIGHLIGHT_QUERY: String by lazy { readBundledTreeSitterBashResource("queries/highlights.scm") }
-
-/**
- * Returns the syntax highlighting query for this grammar.
- */
-fun highlightQuery(): String = HIGHLIGHT_QUERY
