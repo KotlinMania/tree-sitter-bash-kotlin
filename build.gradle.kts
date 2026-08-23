@@ -376,7 +376,7 @@ val generateBundledTreeSitterBashResources =
             val highlightsB64 = encoder.encodeToString(highlightsFile.asFile.readBytes())
             pkgDir.resolve("BundledResources.kt").writeText(
                 """
-                // port-lint: ignore — generated from
+                // Generated from
                 // src/commonMain/resources/io/github/kotlinmania/treesitterbash/
                 // by the generateBundledTreeSitterBashResources Gradle task.
                 // DO NOT EDIT BY HAND.
