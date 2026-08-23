@@ -1,4 +1,3 @@
-// port-lint: source lib.rs
 package io.github.kotlinmania.treesitterbash
 
 /**
@@ -9,7 +8,7 @@ package io.github.kotlinmania.treesitterbash
  * each wasm-js caller stops here with a clear runtime error rather than
  * returning a null pointer.
  */
-internal actual fun treeSitterBash(): Long =
+internal actual fun treeSitterBashRaw(): Long =
     throw UnsupportedOperationException(
         "tree-sitter-bash grammar binding on Kotlin/Wasm-JS requires an " +
             "async web-tree-sitter load that does not yet bridge to the " +
