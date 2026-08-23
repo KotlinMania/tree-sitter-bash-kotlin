@@ -171,6 +171,33 @@ fun registerCodeqlCompileTask(
                     .joinToString(File.pathSeparator) { it.absolutePath }
             val commonSourceFiles = commonSources.files.toMutableList()
             val sourceFiles = sources.files.toMutableList()
+
+            val stubResources = dummySourceDir.get().file("io/github/kotlinmania/treesitterbash/BundledResourcesStub.kt").asFile
+            stubResources.parentFile.mkdirs()
+            stubResources.writeText(
+                "package io.github.kotlinmania.treesitterbash\n\n" +
+                    "internal val BUNDLED_TREE_SITTER_BASH_RESOURCES: Map<String, String> = emptyMap()\n",
+            )
+            commonSourceFiles.add(stubResources)
+            sourceFiles.add(stubResources)
+
+            val stubLanguage = dummySourceDir.get().file("io/github/kotlinmania/treesitterlanguage/LanguageStub.kt").asFile
+            stubLanguage.parentFile.mkdirs()
+            stubLanguage.writeText(
+                "package io.github.kotlinmania.treesitterlanguage\n\n" +
+                    "fun interface LanguageProvider {\n" +
+                    "    fun call(): Long\n" +
+                    "}\n\n" +
+                    "class LanguageFn private constructor(private val raw: LanguageProvider) {\n" +
+                    "    companion object {\n" +
+                    "        fun fromRaw(f: LanguageProvider): LanguageFn = LanguageFn(f)\n" +
+                    "    }\n" +
+                    "    fun intoRaw(): LanguageProvider = raw\n" +
+                    "}\n",
+            )
+            commonSourceFiles.add(stubLanguage)
+            sourceFiles.add(stubLanguage)
+
             // If no real sources were found, use the dummy source generated in onlyIf.
             if (commonSourceFiles.isEmpty()) {
                 commonSourceFiles.add(dummySourceFile.get().asFile)
