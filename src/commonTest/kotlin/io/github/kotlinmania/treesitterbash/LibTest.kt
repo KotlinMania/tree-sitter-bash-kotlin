@@ -17,14 +17,12 @@ class LibTest {
         val text = NODE_TYPES
         assertTrue(text.isNotEmpty(), "NODE_TYPES should not be empty")
         assertTrue(text.trimStart().startsWith("["), "node-types.json begins with a JSON array")
-        assertEquals(text, nodeTypes())
     }
 
     @Test
     fun highlightQueryIsReachableFromCommonMain() {
         val text = HIGHLIGHT_QUERY
         assertTrue(text.isNotEmpty(), "HIGHLIGHT_QUERY should not be empty")
-        assertEquals(text, highlightQuery())
     }
 
     @Test
@@ -38,6 +36,5 @@ class LibTest {
     fun testCanLoadGrammar() {
         assertNotNull(LANGUAGE)
         assertNotNull(LANGUAGE.intoRaw())
-        assertNotNull(language())
     }
 }
