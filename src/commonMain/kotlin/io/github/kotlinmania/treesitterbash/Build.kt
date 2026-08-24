@@ -1,4 +1,4 @@
-// port-lint: source bindings/rust/build.rs
+// port-lint: source tree-sitter-bash/bindings/rust/build.rs
 package io.github.kotlinmania.treesitterbash
 
 /**
