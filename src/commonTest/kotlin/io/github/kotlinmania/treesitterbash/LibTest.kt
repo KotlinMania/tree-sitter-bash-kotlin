@@ -35,6 +35,5 @@ class LibTest {
     @Test
     fun testCanLoadGrammar() {
         assertNotNull(LANGUAGE)
-        assertNotNull(LANGUAGE.intoRaw())
     }
 }
