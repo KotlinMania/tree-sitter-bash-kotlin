@@ -42,9 +42,9 @@ val defaultCodeqlSourceClasspath =
         "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2",
     ).joinToString(",")
 
-val codeqlKotlinc by configurations.creating
-val codeqlSourceClasspath by configurations.creating
-val codeqlAndroidAar by configurations.creating
+val codeqlKotlinc = configurations.create("codeqlKotlinc")
+val codeqlSourceClasspath = configurations.create("codeqlSourceClasspath")
+val codeqlAndroidAar = configurations.create("codeqlAndroidAar")
 
 dependencies {
     add("codeqlKotlinc", "org.jetbrains.kotlin:kotlin-compiler-embeddable:$codeqlKotlinVersion")
@@ -186,13 +186,14 @@ fun registerCodeqlCompileTask(
             stubLanguage.writeText(
                 "package io.github.kotlinmania.treesitterlanguage\n\n" +
                     "fun interface LanguageProvider {\n" +
-                    "    fun call(): Long\n" +
+                    "    fun getLanguage(): Any?\n" +
                     "}\n\n" +
-                    "class LanguageFn private constructor(private val raw: LanguageProvider) {\n" +
+                    "class LanguageFn(val provider: LanguageProvider) {\n" +
                     "    companion object {\n" +
-                    "        fun fromRaw(f: LanguageProvider): LanguageFn = LanguageFn(f)\n" +
+                    "        fun fromRaw(provider: LanguageProvider): LanguageFn = LanguageFn(provider)\n" +
+                    "        fun fromProvider(provider: LanguageProvider): LanguageFn = LanguageFn(provider)\n" +
                     "    }\n" +
-                    "    fun intoRaw(): LanguageProvider = raw\n" +
+                    "    fun intoRaw(): Any? = provider.getLanguage()\n" +
                     "}\n",
             )
             commonSourceFiles.add(stubLanguage)
