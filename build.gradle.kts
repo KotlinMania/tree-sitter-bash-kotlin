@@ -341,6 +341,53 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().con
 
 val jvmToolchainVersion = providers.gradleProperty("jvm.toolchain").getOrElse("21").toInt()
 
+val bundledResourcesOutputDir =
+    layout.buildDirectory.dir("generated/treesitterbash/commonMain/kotlin")
+
+val generateBundledTreeSitterBashResources =
+    tasks.register("generateBundledTreeSitterBashResources") {
+        description = "Generate commonMain Kotlin source embedding the bundled tree-sitter-bash resources."
+        group = "build"
+        val nodeTypesFile =
+            layout.projectDirectory.file(
+                "src/commonMain/resources/io/github/kotlinmania/treesitterbash/node-types.json",
+            )
+        val highlightsFile =
+            layout.projectDirectory.file(
+                "src/commonMain/resources/io/github/kotlinmania/treesitterbash/queries/highlights.scm",
+            )
+        inputs.file(nodeTypesFile).withPathSensitivity(PathSensitivity.RELATIVE)
+        inputs.file(highlightsFile).withPathSensitivity(PathSensitivity.RELATIVE)
+        outputs.dir(bundledResourcesOutputDir)
+        doLast {
+            val outRoot = bundledResourcesOutputDir.get().asFile
+            val pkgDir = outRoot.resolve("io/github/kotlinmania/treesitterbash")
+            pkgDir.mkdirs()
+            val encoder = Base64.getEncoder()
+            val nodeTypesB64 = encoder.encodeToString(nodeTypesFile.asFile.readBytes())
+            val highlightsB64 = encoder.encodeToString(highlightsFile.asFile.readBytes())
+            pkgDir.resolve("BundledResources.kt").writeText(
+                """
+                // Generated from
+                // src/commonMain/resources/io/github/kotlinmania/treesitterbash/
+                // by the generateBundledTreeSitterBashResources Gradle task.
+                // DO NOT EDIT BY HAND.
+                @file:OptIn(kotlin.io.encoding.ExperimentalEncodingApi::class)
+
+                package io.github.kotlinmania.treesitterbash
+
+                import kotlin.io.encoding.Base64
+
+                internal val BUNDLED_TREE_SITTER_BASH_RESOURCES: Map<String, String> =
+                    mapOf(
+                        "node-types.json" to Base64.decode("$nodeTypesB64").decodeToString(),
+                        "queries/highlights.scm" to Base64.decode("$highlightsB64").decodeToString(),
+                    )
+                """.trimIndent() + "\n",
+            )
+        }
+    }
+
 // ============================================================================
 // kotlin { … }
 // ----------------------------------------------------------------------------
@@ -490,8 +537,11 @@ kotlin {
     }
 
     sourceSets {
-        commonMain.dependencies {
-            implementation(commonMainDependencyBundle)
+        commonMain {
+            kotlin.srcDir(generateBundledTreeSitterBashResources)
+            dependencies {
+                implementation(commonMainDependencyBundle)
+            }
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
