@@ -50,5 +50,7 @@ public val NODE_TYPES: String by lazy { readBundledTreeSitterBashResource("node-
 
 /**
  * The syntax highlighting query for this grammar.
+ *
+ * Provides syntax highlighting definitions and captures for Bash constructs.
  */
 public val HIGHLIGHT_QUERY: String by lazy { readBundledTreeSitterBashResource("queries/highlights.scm") }
