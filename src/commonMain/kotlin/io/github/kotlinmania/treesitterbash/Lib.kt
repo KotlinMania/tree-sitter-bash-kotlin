@@ -4,10 +4,10 @@ package io.github.kotlinmania.treesitterbash
 import io.github.kotlinmania.treesitterlanguage.LanguageFn
 
 /**
- * This library provides Bash language support for the [Tree-sitter](https://tree-sitter.github.io/) parsing library.
+ * This crate provides Bash language support for the [tree-sitter][] parsing library.
  *
- * Typically, you will use the [LANGUAGE] constant to add this language to a
- * Tree-sitter parser, and then use the parser to parse some code:
+ * Typically, you will use the [LANGUAGE][] constant to add this language to a
+ * tree-sitter [Parser][], and then use the parser to parse some code:
  *
  * ```kotlin
  * val code = """
@@ -20,9 +20,8 @@ import io.github.kotlinmania.treesitterlanguage.LanguageFn
  * check(!tree.rootNode().hasError())
  * ```
  *
- * Additional references:
- * - [Parser documentation](https://docs.rs/tree-sitter)
- * - [Tree-sitter project](https://tree-sitter.github.io/)
+ * [Parser]: https://docs.rs/tree-sitter
+ * [tree-sitter]: https://tree-sitter.github.io/
  */
 
 /**
@@ -36,15 +35,16 @@ public fun treeSitterBash(): Long {
 }
 
 /**
- * The Tree-sitter [LanguageFn] for this grammar.
+ * The tree-sitter [`LanguageFn`][LanguageFn] for this grammar.
  *
- * @see <a href="https://docs.rs/tree-sitter-language">LanguageFn documentation</a>
+ * [LanguageFn]: https://docs.rs/tree-sitter-language
  */
 public val LANGUAGE: LanguageFn = LanguageFn.fromRaw(::treeSitterBash)
 
 /**
- * The content of the [`node-types.json`](https://tree-sitter.github.io/tree-sitter/using-parsers#static-node-types)
- * file for this grammar.
+ * The content of the [`node-types.json`][] file for this grammar.
+ *
+ * [`node-types.json`]: https://tree-sitter.github.io/tree-sitter/using-parsers#static-node-types
  */
 public val NODE_TYPES: String by lazy { readBundledTreeSitterBashResource("node-types.json") }
 
