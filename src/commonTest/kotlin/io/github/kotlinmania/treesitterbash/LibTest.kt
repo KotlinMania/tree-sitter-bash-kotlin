@@ -1,4 +1,4 @@
-// port-lint: tests lib.rs
+// port-lint: tests tree-sitter-bash/bindings/rust/lib.rs
 package io.github.kotlinmania.treesitterbash
 
 import kotlin.test.Test

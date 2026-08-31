@@ -1,4 +1,4 @@
-// port-lint: source lib.rs
+// port-lint: source tree-sitter-bash/bindings/rust/lib.rs
 package io.github.kotlinmania.treesitterbash
 
 import io.github.kotlinmania.treesitterlanguage.LanguageFn
@@ -29,10 +29,7 @@ import io.github.kotlinmania.treesitterlanguage.LanguageFn
  *
  * @return the raw native grammar pointer handle as a [Long]
  */
-public fun treeSitterBash(): Long {
-    val ptr = nativeLanguagePointer()
-    return ptr
-}
+public fun treeSitterBash(): Long = nativeLanguagePointer()
 
 /**
  * The tree-sitter [`LanguageFn`][LanguageFn] for this grammar.
