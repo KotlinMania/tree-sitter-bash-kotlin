@@ -29,9 +29,7 @@ import io.github.kotlinmania.treesitterlanguage.LanguageFn
  *
  * @return the raw native grammar pointer handle as a [Long]
  */
-public fun treeSitterBash(): Long {
-    return nativeLanguagePointer()
-}
+public fun treeSitterBash(): Long = nativeLanguagePointer()
 
 /**
  * The tree-sitter [`LanguageFn`][LanguageFn] for this grammar.
