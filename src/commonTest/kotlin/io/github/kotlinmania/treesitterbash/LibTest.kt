@@ -34,6 +34,8 @@ class LibTest {
 
     @Test
     fun testCanLoadGrammar() {
+        // Upstream tests instantiate dev-dependency tree_sitter::Parser and call set_language(&LANGUAGE.into());
+        // in commonTest without tree-sitter parser runtime, we verify LANGUAGE provider initialization.
         assertNotNull(LANGUAGE)
     }
 }
