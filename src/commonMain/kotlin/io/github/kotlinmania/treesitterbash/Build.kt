@@ -75,8 +75,6 @@ internal object Build {
      * Executes the build script logic.
      */
     fun main(srcDir: String = "src", isMsvc: Boolean = false) {
-        val srcDir = srcDir
-
         val cConfig = CcBuild()
         cConfig
             .std("c11")
