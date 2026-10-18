@@ -21,6 +21,7 @@ kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "ko
 
 [libraries]
 tree-sitter-language = { module = "io.github.kotlinmania:tree-sitter-language", version = "0.1.0" }
+cc = { module = "io.github.kotlinmania:cc-kotlin", version = "0.1.0" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
@@ -31,9 +32,11 @@ kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-
 [bundles]
 tree-sitter-bash-commonMain = [
   "tree-sitter-language",
+  "cc",
   "kotlinx-coroutines-core",
   "kotlinx-serialization-core",
   "kotlinx-serialization-json",
   "kotlinx-datetime",
   "collections-immutable",
 ]
+

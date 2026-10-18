@@ -34,3 +34,15 @@ if (treeSitterLanguageLocal.exists()) {
         }
     }
 }
+
+val ccLocal = file("../cc-kotlin")
+if (ccLocal.exists()) {
+    includeBuild(ccLocal) {
+        dependencySubstitution {
+            substitute(module("io.github.kotlinmania:cc"))
+                .using(project(":"))
+            substitute(module("io.github.kotlinmania:cc-kotlin"))
+                .using(project(":"))
+        }
+    }
+}

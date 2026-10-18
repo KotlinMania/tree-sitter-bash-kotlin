@@ -1,98 +1,55 @@
 // port-lint: source bindings/rust/build.rs
 package io.github.kotlinmania.treesitterbash
 
-/**
- * Build configuration utilities matching upstream Cargo build script.
- */
-internal object Build {
-    /**
-     * Builder mimicking `cc::Build` compiler configuration.
-     */
-    class CcBuild {
-        var std: String? = null
-        val includeDirs: MutableList<String> = mutableListOf()
-        val flags: MutableList<String> = mutableListOf()
-        val files: MutableList<String> = mutableListOf()
+import io.github.kotlinmania.cc.Build
 
-        fun std(standard: String): CcBuild {
-            this.std = standard
-            return this
-        }
+private class Path(
+    private val path: String,
+) {
+    fun join(other: String): Path = Path(if (path.isEmpty()) other else "$path/$other")
 
-        fun include(dir: String): CcBuild {
-            includeDirs.add(dir)
-            return this
-        }
+    fun toStr(): Path = this
 
-        fun flagIfSupported(flag: String): CcBuild {
-            flags.add(flag)
-            return this
-        }
+    fun unwrap(): String = path
 
-        fun flag(flag: String): CcBuild {
-            flags.add(flag)
-            return this
-        }
+    override fun toString(): String = path
 
-        fun file(filePath: String): CcBuild {
-            files.add(filePath)
-            return this
-        }
+    companion object {
+        fun new(path: String): Path = Path(path)
+    }
+}
 
-        fun compile(libName: String): String = "cargo:compile=$libName"
+private fun Build.include(path: Path): Build =
+    include(path.unwrap())
+
+private fun Build.file(path: Path): Build =
+    file(path.unwrap())
+
+private fun println(pattern: String, arg: Any?) {
+    kotlin.io.println(pattern.replace("{}", arg.toString()))
+}
+
+public fun main() {
+    val srcDir = Path.new("src")
+
+    val cConfig = Build.new()
+    cConfig
+        .std("c11")
+        .include(srcDir)
+        .flagIfSupported("-Wno-unused-value")
+
+    val targetEnv = "msvc"
+    if (targetEnv == "msvc") {
+        cConfig.flag("-utf-8")
     }
 
-    /**
-     * Configures C compiler flags and source paths for building tree-sitter-bash.
-     *
-     * @param srcDir path to C sources directory
-     * @param isMsvc whether targeting MSVC environment
-     * @return list of configured rerun and compile instructions
-     */
-    fun configure(srcDir: String = "src", isMsvc: Boolean = false): List<String> {
-        val outputs = mutableListOf<String>()
-        val cConfig = CcBuild()
-        cConfig
-            .std("c11")
-            .include(srcDir)
-            .flagIfSupported("-Wno-unused-value")
-        if (isMsvc) {
-            cConfig.flag("-utf-8")
-        }
-        val parserPath = "$srcDir/parser.c"
-        cConfig.file(parserPath)
-        outputs.add("cargo:rerun-if-changed=$parserPath")
+    val parserPath = srcDir.join("parser.c")
+    cConfig.file(parserPath)
+    println("cargo:rerun-if-changed={}", parserPath.toStr().unwrap())
 
-        val scannerPath = "$srcDir/scanner.c"
-        cConfig.file(scannerPath)
-        outputs.add("cargo:rerun-if-changed=$scannerPath")
+    val scannerPath = srcDir.join("scanner.c")
+    cConfig.file(scannerPath)
+    println("cargo:rerun-if-changed={}", scannerPath.toStr().unwrap())
 
-        outputs.add(cConfig.compile("tree-sitter-bash"))
-        return outputs
-    }
-
-    /**
-     * Executes the build script logic.
-     */
-    fun main(srcDir: String = "src", isMsvc: Boolean = false) {
-        val cConfig = CcBuild()
-        cConfig
-            .std("c11")
-            .include(srcDir)
-            .flagIfSupported("-Wno-unused-value")
-
-        if (isMsvc) {
-            cConfig.flag("-utf-8")
-        }
-
-        val parserPath = "$srcDir/parser.c"
-        cConfig.file(parserPath)
-        println("cargo:rerun-if-changed=$parserPath")
-
-        val scannerPath = "$srcDir/scanner.c"
-        cConfig.file(scannerPath)
-        println("cargo:rerun-if-changed=$scannerPath")
-
-        cConfig.compile("tree-sitter-bash")
-    }
+    cConfig.compile("tree-sitter-bash")
 }

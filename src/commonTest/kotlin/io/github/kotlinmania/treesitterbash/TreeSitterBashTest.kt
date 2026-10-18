@@ -1,4 +1,3 @@
-// port-lint: tests bindings/rust/lib.rs
 package io.github.kotlinmania.treesitterbash
 
 import kotlin.test.Test
@@ -9,9 +8,9 @@ import kotlin.test.assertTrue
 /**
  * Smoke tests for the commonMain surface: bundled resources are reachable
  * on every Kotlin target via the generated [BUNDLED_TREE_SITTER_BASH_RESOURCES]
- * map, and [LANGUAGE] is a non-null [LanguageFn].
+ * map, and [LANGUAGE] is a non-null [io.github.kotlinmania.treesitterlanguage.LanguageFn].
  */
-class LibTest {
+class TreeSitterBashTest {
     @Test
     fun nodeTypesJsonIsReachableFromCommonMain() {
         val text = NODE_TYPES

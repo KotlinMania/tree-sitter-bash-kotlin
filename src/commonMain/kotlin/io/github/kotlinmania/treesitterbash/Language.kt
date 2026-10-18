@@ -1,4 +1,3 @@
-// port-lint: source bindings/rust/lib.rs
 package io.github.kotlinmania.treesitterbash
 
 import io.github.kotlinmania.treesitterlanguage.LanguageFn
@@ -6,8 +5,8 @@ import io.github.kotlinmania.treesitterlanguage.LanguageFn
 /**
  * This crate provides Bash language support for the [tree-sitter][] parsing library.
  *
- * Typically, you will use the [LANGUAGE][] constant to add this language to a
- * tree-sitter [Parser][], and then use the parser to parse some code:
+ * Typically, you will use the [LANGUAGE] constant to add this language to a
+ * tree-sitter [Parser], and then use the parser to parse some code:
  *
  * ```kotlin
  * val code = """
