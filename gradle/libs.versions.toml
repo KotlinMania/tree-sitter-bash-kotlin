@@ -9,6 +9,9 @@ detekt = "2.0.0-alpha.6"
 ktlint = "14.2.0"
 ktlintEngine = "1.8.0"
 kotlinxBenchmark = "0.5.0"
+treeSitterLanguage = "0.1.1"
+cc = "0.1.0"
+androidxTestRunner = "1.7.0"
 
 [plugins]
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "androidKmp" }
@@ -23,19 +26,19 @@ kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "ko
 [libraries]
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serialization" }
-tree-sitter-language = { module = "io.github.kotlinmania:tree-sitter-language", version = "0.1.0" }
-cc = { module = "io.github.kotlinmania:cc-kotlin", version = "0.1.0" }
+tree-sitter-language-kotlin = { module = "io.github.kotlinmania:tree-sitter-language-kotlin", version.ref = "treeSitterLanguage" }
+cc-kotlin = { module = "io.github.kotlinmania:cc-kotlin", version.ref = "cc" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "collectionsImmutable" }
 kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmark" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
 
 [bundles]
 tree-sitter-bash-commonMain = [
-  "tree-sitter-language",
-  "cc",
-  "kotlinx-coroutines-core",
-  "kotlinx-datetime",
-  "collections-immutable",
+  "cc-kotlin",
+]
+tree-sitter-bash-commonMainApi = [
+  "tree-sitter-language-kotlin",
 ]
 

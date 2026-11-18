@@ -29,8 +29,19 @@ import TreeSitterBash
 // grows. For now the import + a single passing assertion is the
 // canary that the pipeline is green for this repo.
 @Suite struct TreeSitterBashExportTests {
-    @Test func testSwiftModuleLoads() {
-        #expect(Bool(true), "TreeSitterBash swift module imported cleanly")
+    @Test func testBundledResourcesAndGrammarMetadata() {
+        #expect(!NODE_TYPES.isEmpty)
+        #expect(NODE_TYPES.contains("\"program\""))
+        #expect(!HIGHLIGHT_QUERY.isEmpty)
+        #expect(HIGHLIGHT_QUERY.contains("(command_name)"))
+        #expect(HIGHLIGHT_QUERY.contains("(variable_name)"))
+    }
+
+    @Test func testLanguageFnExposesProvider() {
+        let language = LANGUAGE
+        _ = language.intoRaw()
+        #expect(language == LANGUAGE)
+        #expect(!language.toString().isEmpty)
     }
 }
 
